@@ -1,0 +1,85 @@
+service: pet-adoption-notifier
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  profile: pet-finder-deployer
+
+  environment:
+    BUCKET_NAME: !Ref DataBucket
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+            - s3:ListBucket
+          Resource:
+            - !GetAtt DataBucket.Arn
+            - !Sub "${DataBucket.Arn}/*"
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
+
+functions:
+  scraperFunction:
+    handler: src/scraper.handler
+    timeout: 120
+    memorySize: 1600
+    logRetentionInDays: 14
+    environment:
+      BUCKET_NAME: !Ref DataBucket
+    events:
+      - schedule: rate(25 minutes)
+
+  deduperFunction:
+    handler: src/deduper.handler
+    timeout: 120
+    logRetentionInDays: 14
+    environment:
+      BUCKET_NAME: !Ref DataBucket
+    events:
+      - s3:
+          bucket: !Ref DataBucket
+          existing: true
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: 2024/
+            - suffix: .json
+
+  notifyFunction:
+    handler: src/notifier.handler
+    timeout: 120
+    logRetentionInDays: 14
+    environment:
+      BUCKET_NAME: !Ref DataBucket
+      EMAIL_ADDRESS: youremail@example.com
+    events:
+      - s3:
+          bucket: !Ref DataBucket
+          existing: true
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: master/
+            - suffix: .json
+
+resources:
+  Resources:
+    DataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub pet-data-${AWS::Region}-${AWS::AccountId}
+    LambdaDeploymentBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub lambda-deployment-${AWS::Region}-${AWS::AccountId}
+    VerifyEmailIdentity:
+      Type: AWS::SES::EmailIdentity
+      Properties:
+        EmailIdentity: youremail@example.com
