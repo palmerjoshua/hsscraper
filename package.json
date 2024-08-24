@@ -3,18 +3,15 @@
   "version": "1.0.0",
   "main": "src/scraper.js",
   "scripts": {
-    "test": "jest"
+    "test": "echo Tests are not set up yet. && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["pet", "adoption", "dog", "humane", "society", "Broward"],
+  "author": "Joshua Palmer",
+  "license": "CC-BY-3.0",
+  "description": "Notifies me when new dogs are available for adoption at the Broward County Humane Society.",
   "dependencies": {
     "@sparticuz/chromium": "^127.0.0",
     "aws-sdk": "^2.1677.0",
     "puppeteer-core": "^23.1.1"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
   }
 }
