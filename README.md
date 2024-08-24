@@ -43,14 +43,16 @@ It filters out dog breeds I'm not interested in, and it notifies me only when th
 * Generate access key and secret key for this user, and save to an AWS profile on your machine. The profile name should match whatever is in serverless.yml, in the `provider.profile` value.
 * An email address whose inbox you have full access to.
 
-
-
 ## Deployment
 1. Make sure the email address values in serverless.yml contain **your** email address.
 1. From the project root, run: `serverless deploy`
 1. You will receive a confirmation email **during the stack deployment**. You must copy the link from the email and paste it into a browser to confirm. Deployment will not succeed if you ignore this step.
 1. A few minutes after email confirmation, the stack should finish deploying.
 
+## Tear down
+If you want to remove all resources from your AWS account...
+1. You must manually delete the data files from the S3 bucket.
+1. After clearing the S3 bucket, run this from the project root: `serverless remove`
 
 ## Testing
 If you don't want to wait 25 minutes for the scheduler to run, you can test the lambda directly in the AWS console.
